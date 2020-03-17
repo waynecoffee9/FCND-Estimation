@@ -41,13 +41,6 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 ### Step 2: Attitude Estimation ###
 
 To build a better attitude estimator, rate of change in euler angles need to be calculated by transforming gyro readings from body frame to inertial frame.
-The transformation matrix is:
-
-```math
-$$
-\begin{pmatrix} \dot{\phi} \\ \dot{\theta} \\ \dot{\psi}\end{pmatrix} = \begin{pmatrix} 1 & \sin{\phi}\tan{\theta} & \cos{\phi}\tan{\theta} \\ 0 & \cos{\phi} & -\sin{\phi} \\ 0 & \sin{\phi}\sec{\theta} & \cos{\phi}\sec{\theta} \end{pmatrix} \times \begin{pmatrix} p \\ q \\ r \end{pmatrix}
-$$
-```
 
 The implementation in C++ is:
 
@@ -66,12 +59,7 @@ The implementation in C++ is:
 
 The euler angle rate is then multiplied by IMU sampling rate and added to the predicted roll, pitch, and yaw.
 
-Both accelerometer and gyro signals are integrated to provide fast response and non-drifting estimates using:
-
-$$
-\hat{\theta}_t = \frac{\tau}{\tau + dt}\left( \hat{\theta}_{t-1} +  z_{t,\dot{\theta}} \times dt\right) + \frac{dt}{\tau + dt} z_{t,\theta} \\ 
-\hat{\phi}_t = \frac{\tau}{\tau + dt}\left( \hat{\phi}_{t-1} +  z_{t,\dot{\phi}} \times dt\right) + \frac{dt}{\tau + dt} z_{t,\phi}
-$$
+Both accelerometer and gyro signals are integrated to provide fast response and non-drifting estimates.
 
 The video below shows the error from the integrated estimates is kept well below 0.1 rad.
 
@@ -96,34 +84,15 @@ First, under `PredictState()`, new states estimate prediction is done with discr
   predictedState[6] = curState[6];
 ```
 
-Second, under `GetRbgPrime()`, it returns $\frac{\partial}{\partial \psi}$ of the rotation matrix.
+Second, under `GetRbgPrime()`, it returns partial derivative of the rotation matrix.
 
-$$
-R'_{bg} = \left [ \begin{array}{ccccccc}
-   -\cos{\theta}\sin{\psi} & -\sin{\phi}\sin{\theta}\sin{\psi}-\cos{\phi}\cos{\psi} & -\cos{\phi}\sin{\theta}\sin{\psi}+\sin{\phi}\cos{\psi}\\
-   \cos{\theta}\sin{\psi} & \sin{\phi}\sin{\theta}\cos{\psi}-\cos{\phi}\sin{\psi} & \cos{\phi}\sin{\theta}\cos{\psi}+\sin{\phi}\sin{\psi}\\
-   0 & 0 & 0\\
-  \end{array}
-  \right] 
-$$
+```cpp
+  RbgPrime << -cos(pitch)*sin(yaw), -sin(roll)*sin(pitch)*sin(yaw)-cos(roll)*cos(yaw), -cos(roll)*sin(pitch)*sin(yaw)+sin(roll)*cos(yaw),
+            cos(pitch)*cos(yaw), sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw), cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw),
+            0.0,0.0,0.0;
+```
 
-
-Finally, under `Predict()`, Jacobian, g prime is calculated from:
-
-$$
-g'(x_t, u_t, \Delta t) = \left [ \begin{array}{ccccccc}
-      1 & 0 & 0 & \Delta t & 0 & 0 & 0\\
-      0 & 1 & 0 & 0 & \Delta t & 0 & 0\\
-      0 & 0 & 1 & 0 & 0 & \Delta t & 0\\
-      0 & 0 & 0 & 1 & 0 & 0 & R'_{bg}[0:]u_t[0:3] \Delta t\\
-      0 & 0 & 0 & 0 & 1  & 0 & R'_{bg}[1:]u_t[0:3] \Delta t\\
-      0 & 0 & 0 & 0 & 0 & 1 &  R'_{bg}[2:]u_t[0:3] \Delta t\\
-      0 & 0 & 0 & 0 & 0 & 0 & 1
-    \end{array}
-    \right] 
-$$
-
-The implementation is:
+Finally, under `Predict()`, Jacobian, g prime is implemented:
 
 ```cpp
   gPrime(0,3) = dt;
@@ -134,9 +103,7 @@ The implementation is:
   gPrime(5,6) = (RbgPrime(2,0) * accel[0] + RbgPrime(2,1) * accel[1] + RbgPrime(2,2) * accel[2]) * dt;
 ```
 
-G prime is then used to calculate predicted covariance matrix:
-
-$$\bar{\sum}_t = g'_t{\sum}_{t-1}g'^T_t+Q^T$$
+G prime is then used to calculate predicted covariance matrix.
 
 The implementation is simply:
 
@@ -200,17 +167,6 @@ GPSVelZStd = 10
 ```
 
 For the actual `UpdateFromGPS()` implementation, it is as simple as using prdicted states and h prime.
-
-h'(x_t) = \left [ \begin{array}{ccccccc}
-      1 & 0 & 0 & 0 & 0 & 0 & 0\\
-      0 & 1 & 0 & 0 & 0 & 0 & 0\\
-      0 & 0 & 1 & 0 & 0 & 0 & 0\\
-      0 & 0 & 0 & 1 & 0 & 0 & 0 \\
-      0 & 0 & 0 & 0 & 1 & 0 & 0 \\
-      0 & 0 & 0 & 0 & 0 & 1 & 0
-    \end{array}
-    \right] 
-$$
 
 Actual implementation is:
 
