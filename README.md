@@ -182,8 +182,8 @@ Actual implementation is:
 
 The video below shows a working and stable quadrotor control.  The z position error is withint 1.0m.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=3zOdd6qcK68
-" target="_blank"><img src="http://img.youtube.com/vi/3zOdd6qcK68/0.jpg" 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=Z1OvCSnOhrY
+" target="_blank"><img src="http://img.youtube.com/vi/Z1OvCSnOhrY/0.jpg" 
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 ### Step 6: Adding Your Controller ###
