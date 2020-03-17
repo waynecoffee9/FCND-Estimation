@@ -161,9 +161,9 @@ To implement estimator with realistic IMU sensors activated, the GPS uncertainty
 
 ```cpp
 GPSPosXYStd = 1
-GPSPosZStd = 100
+GPSPosZStd = 5
 GPSVelXYStd = .1
-GPSVelZStd = 10
+GPSVelZStd = .6
 ```
 
 For the actual `UpdateFromGPS()` implementation, it is as simple as using prdicted states and h prime.
@@ -180,7 +180,7 @@ Actual implementation is:
   }
 ```
 
-The video below shows a working and stable quadrotor control.  The z position error is withint 0.3m.
+The video below shows a working and stable quadrotor control.  The z position error is withint 1.0m.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=3zOdd6qcK68
 " target="_blank"><img src="http://img.youtube.com/vi/3zOdd6qcK68/0.jpg" 
