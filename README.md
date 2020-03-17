@@ -43,11 +43,11 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 To build a better attitude estimator, rate of change in euler angles need to be calculated by transforming gyro readings from body frame to inertial frame.
 The transformation matrix is:
 
-\begin{equation}
+```math
 $$
 \begin{pmatrix} \dot{\phi} \\ \dot{\theta} \\ \dot{\psi}\end{pmatrix} = \begin{pmatrix} 1 & \sin{\phi}\tan{\theta} & \cos{\phi}\tan{\theta} \\ 0 & \cos{\phi} & -\sin{\phi} \\ 0 & \sin{\phi}\sec{\theta} & \cos{\phi}\sec{\theta} \end{pmatrix} \times \begin{pmatrix} p \\ q \\ r \end{pmatrix}
 $$
-\end{equation}
+```
 
 The implementation in C++ is:
 
