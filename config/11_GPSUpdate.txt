@@ -6,7 +6,7 @@ INCLUDE QuadEstimatorEKF.txt
 
 # BASIC
 Sim.RunMode = Repeat
-Sim.EndTime = 45
+Sim.EndTime = 25
 Sim.Vehicle1 = Quad
 
 # QUAD SETUP
